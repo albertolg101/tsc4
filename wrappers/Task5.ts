@@ -26,4 +26,9 @@ export class Task5 implements Contract {
             body: beginCell().endCell(),
         });
     }
+
+    async getFib(provider: ContractProvider) {
+        const value = await provider.get("fibonacci_sequence", []);
+        return value;
+    }
 }

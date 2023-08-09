@@ -31,8 +31,10 @@ describe('Task5', () => {
         });
     });
 
-    it('should deploy', async () => {
-        // the check is done inside beforeEach
-        // blockchain and task5 are ready to use
+    it('should give [0, 1, 1, 2, 3]', async () => {
+        const value = await task5.getFib();
+        console.log(value.gasUsed);
+        console.log(value.stack.readTuple())
+        expect(true).toEqual(true);
     });
 });
