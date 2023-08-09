@@ -19,7 +19,9 @@
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
   
 ;; testable
-(tuple) fibonacci_sequence (int n, int k) method_id {
+;; (tuple) fibonacci_sequence (int n, int k) method_id {
+(tuple) fibonacci_sequence () method_id {
+    (int n, int k) = (0, 5);
     tuple ans = empty_tuple();
 
     if(k == 0) {
@@ -28,21 +30,21 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
     if(n == 0) {
         if(k > 0) {
-            ans.tpush(0);
+            ans~tpush(0);
         }
         if(k > 1) {
-            ans.tpush(1);
+            ans~tpush(1);
         } 
     }
 
     if((n == 1) & (k > 0)) {
-            ans.tpush(1);
+            ans~tpush(1);
     }
 
     (int i, int fib_a, int fib_b) = (2, 0, 1);
 
     ;; for(int i = 2 ; i <= n + k ; i++)
-    while(i <= (n + k)) {
+    while(i < (n + k)) {
         (fib_a, fib_b) = (fib_b, fib_a + fib_b);
         if(n <= i) {
             ans~tpush(fib_b);
