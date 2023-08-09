@@ -19,9 +19,9 @@
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
   
 ;; testable
-;; (tuple) fibonacci_sequence (int n, int k) method_id {
-(tuple) fibonacci_sequence () method_id {
-    (int n, int k) = (0, 5);
+(tuple) fibonacci_sequence (int n, int k) method_id {
+;; (tuple) fibonacci_sequence () method_id {
+;;    (int n, int k) = (0, 5);
     tuple ans = empty_tuple();
 
     if(k == 0) {
