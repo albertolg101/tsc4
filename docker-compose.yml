@@ -1,0 +1,9 @@
+services:
+  tsc4:
+    image: ghcr.io/albertolg101/tsc4
+    ports:
+      - '22:22'
+    volumes:
+      - C:/Users/acer_/OneDrive/Documents/Projects/tsc4/contracts:/usr/src/app/contracts
+      - C:/Users/acer_/OneDrive/Documents/Projects/tsc4/wrappers:/usr/src/app/wrappers
+      - C:/Users/acer_/OneDrive/Documents/Projects/tsc4/tests:/usr/src/app/tests
