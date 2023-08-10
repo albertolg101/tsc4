@@ -32,7 +32,12 @@ describe('Task2', () => {
     });
 
     it('should deploy', async () => {
-        // the check is done inside beforeEach
-        // blockchain and task2 are ready to use
+        const value = await task2.getMatMul();
+        console.log(value.gasUsed);
+        const mat = value.stack.readTuple()
+        while(mat.remaining) {
+            console.log(mat.pop())
+        }
+        expect(true).toEqual(true);
     });
 });

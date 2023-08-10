@@ -26,4 +26,9 @@ export class Task2 implements Contract {
             body: beginCell().endCell(),
         });
     }
+
+    async getMatMul(provider: ContractProvider) {
+        const value = await provider.get("matrix_multiplier", []);
+        return value;
+    }
 }
