@@ -1,8 +1,9 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { Cell, toNano } from 'ton-core';
+import { BitString, Cell, toNano } from 'ton-core';
 import { Task3 } from '../wrappers/Task3';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
+import exp from 'constants';
 
 describe('Task3', () => {
     let code: Cell;
@@ -32,7 +33,15 @@ describe('Task3', () => {
     });
 
     it('should deploy', async () => {
-        // the check is done inside beforeEach
-        // blockchain and task3 are ready to use
+        const value = await task3.getFindAndReplace();
+        console.log(value.gasUsed);
+        let s = value.stack.readCell().asSlice();
+        let ans: Array<BitString> = [s.loadBits(s.remainingBits)];
+        while(s.remainingRefs) {
+            s = s.loadRef().asSlice();
+            ans.push(s.loadBits(s.remainingBits));
+        }
+        console.log(ans);
+        expect(true).toEqual(true);
     });
 });

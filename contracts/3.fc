@@ -15,12 +15,168 @@
   cell ends with ...10100001111, and the second cell starts with 11111000111111...
 
 -}
+;; ;; Preloads the first reference from a slice.
+cell preload_ref(slice s) asm "PLDREF";
+
+;; ;; Returns both the number of data bits and the number of references in s.
+(int, int) slice_bits_refs(slice s) asm "SBITREFS";
+
+;; Computes the minimum of two integers x and y. 
+int min(int x, int y) asm "MIN";
+
+forall X -> int is_null (X x) asm "ISNULL";
+forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
+forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+
+(int) popcount(int value) {
+    int value_popcount = 0;
+    while(value != 0) {
+      value_popcount += 1;
+      value >>= 1;
+    }
+    return value_popcount;
+}
+
+forall X -> () print(X x) impure { ~dump(x); }
 
 () recv_internal() {
 }
 
+const CELL_SIZE = 1023;
+;; const CELL_SIZE = 4;
+
 ;; testable
+;; (cell) find_and_replace() method_id {
+;;   int flag = 5; ;; 101
+;;   int value = 3; ;; 11
+;;   cell linked_list = begin_cell()
+;;                     .store_uint(0, 1)
+;;                     .store_uint(0, 1)
+;;                     .store_uint(1, 1)
+;;                     .store_uint(1, 1)
+                    
+;;                     .store_uint(1, 1)
+;;                     .store_uint(0, 1)
+;;                     .store_uint(1, 1)
+;;                     .store_uint(1, 1)
+
+;;                     .store_uint(1, 1)
+;;                     .store_ref(
+;;                       begin_cell()
+;;                       .store_uint(0, 1)
+;;                       .store_uint(1, 1)
+;;                       .store_uint(1, 1)
+
+;;                       .store_ref(
+;;                         begin_cell()
+;;                         .store_uint(0, 1)
+;;                         .store_uint(0, 1)
+;;                         .store_uint(1, 1)
+;;                         .store_uint(1, 1)
+;;                         .end_cell())
+
+;;                       .end_cell())
+;;                     .end_cell(); ;; 0011 1011 1011 0011 - 3B3
+;;                     ;;     ANSWER = 0011 1111 1100 11   - 3FCC
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-  return begin_cell().end_cell();
+  int flag_popcount = popcount(flag);
+  int flag_submask+1 = (1 << flag_popcount);
+  int flag_submask = flag_submask+1 - 1;
+
+  int value_popcount = popcount(value);
+  int value_submask = (1 << value_popcount) - 1;
+
+  builder answer = begin_cell();
+  tuple stack = null();
+  int answer_popcount = 0;
+
+  slice node = linked_list.begin_parse();
+  (int sbits, int srefs) = slice_bits_refs(node);
+
+  int point = 0;
+  int slide_window = 0;
+  int slide_window_popcount = 0;
+
+  while(sbits) {
+    repeat(sbits) {
+      slide_window = ((slide_window << 1) | node~load_uint(1));
+      point = (slide_window & flag_submask+1) >> flag_popcount;
+      slide_window_popcount += 1;
+      if(slide_window_popcount >= flag_popcount) {
+        if(slide_window_popcount > flag_popcount) {
+          answer~store_uint(point, 1);
+          ;; print(10);
+          ;; print(point);
+          answer_popcount += 1;
+          slide_window_popcount -= 1;
+        }
+        if ((slide_window & flag_submask) == flag) {
+          int delta_answer_popcount = min(value_popcount, CELL_SIZE - answer_popcount);
+          int new_answer_popcount = value_popcount - delta_answer_popcount;
+          answer~store_uint((value >> (new_answer_popcount)) & ((1 << delta_answer_popcount) - 1), delta_answer_popcount);
+          ;; print(20);
+          ;; print((value >> (new_answer_popcount)) & ((1 << delta_answer_popcount) - 1));
+          if(new_answer_popcount) {
+            stack~push_back(answer);
+            answer = begin_cell()
+                    .store_uint(value & ((1 << (new_answer_popcount)) - 1), new_answer_popcount);
+            ;; print(21);
+            ;; print(value & ((1 << (new_answer_popcount)) - 1));
+            answer_popcount = new_answer_popcount;
+          } else {
+            answer_popcount += value_popcount;
+          }
+          slide_window_popcount = 0;
+        }
+        if(answer_popcount == CELL_SIZE) {
+          stack~push_back(answer);
+          answer = begin_cell();
+          answer_popcount = 0;
+        }
+      }
+    }
+
+    if(srefs) {
+      node = node.preload_ref().begin_parse();
+      (sbits, srefs) = slice_bits_refs(node);
+    } else {
+      sbits = 0;
+    }
+    ;; print(40);
+  }
+    
+  if(slide_window_popcount) {
+    int delta_slide_window_popcount = min(slide_window_popcount, CELL_SIZE - answer_popcount);
+    int new_answer_popcount = slide_window_popcount - delta_slide_window_popcount;
+    answer~store_uint((slide_window >> (new_answer_popcount)) & ((1 << delta_slide_window_popcount) - 1), delta_slide_window_popcount);
+    ;; print(30);
+    ;; print(delta_slide_window_popcount);
+    ;; print((slide_window >> (new_answer_popcount)) & ((1 << delta_slide_window_popcount) - 1));
+    if(new_answer_popcount) {
+      stack~push_back(answer);
+      answer = begin_cell()
+              .store_uint(slide_window & ((1 << (new_answer_popcount)) - 1), new_answer_popcount);
+      ;; print(31);
+      ;; print(slide_window & ((1 << (new_answer_popcount)) - 1));
+      answer_popcount = new_answer_popcount;
+      slide_window_popcount = 0;
+    } else {
+      answer_popcount += value_popcount;
+    }
+  }
+
+  cell last_cell = answer.end_cell();
+
+  while(~ stack.is_null()) {
+    answer = stack~pop_back();
+    answer = answer.store_ref(last_cell);
+    last_cell = answer.end_cell();
+  }
+
+  if(last_cell.is_null()) {
+    last_cell = begin_cell().end_cell();
+  }
+
+  return last_cell;
 }
 
