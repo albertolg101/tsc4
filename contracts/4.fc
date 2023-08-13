@@ -9,13 +9,92 @@
 () recv_internal() {
 }
 
+forall X -> int is_null (X x) asm "ISNULL";
+forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
+forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+
+forall X -> () print (X x) impure { ~dump(x); }
+
+{-
+ASCII
+A-Z 65-90
+a-z 97-122
+-}
+
+const ASCII_A = 65;
+const ASCII_Z = 90;
+const ASCII_a = 97;
+const ASCII_z = 122;
+const inf = (1 << 128);
+const cell_size = 1023;
+
+;; !!!!!!!!!!!!!!! TRY USE inline_ref here
+(builder, tuple) append(builder b, tuple t, int value, int len) {
+  if(b.builder_bits() + len > cell_size) {
+    t~push_back(b);
+    b = begin_cell();
+  }
+
+  b~store_uint(value, len);
+  return (b, t);
+}
+
+;; !!!!!!!!!!!!!!! TRY USE inline_ref here
+(cell) get_cell (tuple stack, builder last_builder) {
+  cell last_cell = last_builder.end_cell();
+  while(~ stack.is_null()) {
+    builder tb = stack~pop_back();
+    last_cell = tb.store_ref(last_cell)
+                  .end_cell();
+  }
+  return last_cell;
+}
+  
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+
+  tuple stack = null();
+  builder answer = begin_cell();
+  answer~store_uint(0, 32);
+
+  slice stext = text.begin_parse();
+  _ = stext~load_uint(32);
+  (int text_recursive_refs, _, _) = text.compute_data_size(inf);
+
+  repeat(text_recursive_refs) {
+    repeat(stext.slice_bits() / 8) {
+      int char = stext~load_uint(8);
+      if((ASCII_A <= char) & (char <= ASCII_Z)) {
+        (answer, stack) = append(
+          answer,
+          stack,
+          (char - ASCII_A + shift) % (ASCII_Z - ASCII_A + 1) + ASCII_A,
+          8);
+      } else { if((ASCII_a <= char) & (char <= ASCII_z)) {
+        (answer, stack) = append(
+          answer,
+          stack,
+          (char - ASCII_a + shift) % (ASCII_z - ASCII_a + 1) + ASCII_a,
+          8);
+      } else {
+        (answer, stack) = append(
+          answer,
+          stack,
+          char,
+          8);
+      } }
+    }
+
+    if(stext.slice_refs()) {
+      stext = stext~load_ref().begin_parse();
+    }
+  }
+
+  return stack.get_cell(answer);
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  return caesar_cipher_encrypt(- shift, text);
 }
 

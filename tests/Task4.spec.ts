@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { Cell, toNano } from 'ton-core';
+import { Cell, beginCell, toNano } from 'ton-core';
 import { Task4 } from '../wrappers/Task4';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -32,7 +32,50 @@ describe('Task4', () => {
     });
 
     it('should deploy', async () => {
-        // the check is done inside beforeEach
-        // blockchain and task4 are ready to use
+        let shift: Array<bigint> = [1n, 2n, 26n, 27n, 28n, -1n, -2n, -26n, -27n, -28n];
+        let answers: Array<Cell> = [
+            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
+
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
+        ]
+        let text = beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell()
+        let gasUsed = 0n;
+        for(let i = 0 ; i < shift.length ; i++) {
+            let value = await task4.getCaesarCipherEncrypt(shift[i], text);
+            gasUsed += value.gasUsed !== undefined && value.gasUsed !== null ? value.gasUsed : 0n;
+            expect(value.stack.readCell()).toEqualCell(answers[i]);
+        }
+    });
+
+    it('should deploy', async () => {
+        let shift: Array<bigint> = [1n, 2n, 26n, 27n, 28n, -1n, -2n, -26n, -27n, -28n];
+        let answers: Array<Cell> = [
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
+
+            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
+        ]
+        let text = beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell()
+        let gasUsed = 0n;
+        for(let i = 0 ; i < shift.length ; i++) {
+            let value = await task4.getCaesarCipherDecrypt(shift[i], text);
+            gasUsed += value.gasUsed !== undefined && value.gasUsed !== null ? value.gasUsed : 0n;
+            expect(value.stack.readCell()).toEqualCell(answers[i]);
+        }
     });
 });
