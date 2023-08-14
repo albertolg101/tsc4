@@ -24,14 +24,7 @@ forall X -> () print(X x) impure { ~dump(x); }
 const INF = (1 << 128);
 const CELL_SIZE = 1023;
 
-(int) popcount(int value) {
-    int value_popcount = 0;
-    while(value != 0) {
-      value_popcount += 1;
-      value >>= 1;
-    }
-    return value_popcount;
-}
+(int) popcount(int value) asm "UBITSIZE";
 
 forall X -> int is_null (X x) asm "ISNULL";
 forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
