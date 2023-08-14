@@ -22,7 +22,7 @@
 forall X -> () print(X x) impure { ~dump(x); }
 
 const INF = (1 << 128);
-const CELL_SIZE = 4;
+const CELL_SIZE = 1023;
 
 (int) popcount(int value) {
     int value_popcount = 0;
@@ -87,6 +87,7 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
         }
 
         if(flag == (slide_window & ((1 << flag_len) - 1))) {
+          slide_window = 0;
           slide_window_len = 0;
           (answer, stack) = append(
             answer,
