@@ -61,7 +61,7 @@ describe('Task3', () => {
 
             .endCell())
         .endCell(); // 0011 1011 1011 0011 - 3B3
-        //    ANSWER = 0011 1111 1100 11   - 3FCC
+        //    ANSWER = 0011 1111 1100 11   - 3FC
 
         let answer = beginCell().storeUint(0b0011_1111_1100_11, 14).endCell();
         

@@ -67,7 +67,7 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
   repeat(linked_list_len) {
     repeat(slinked_list.slice_bits()) {
-      slide_window = (slide_window << 1) + slinked_list~load_uint(1);
+      slide_window = ((slide_window << 1) + slinked_list~load_uint(1)) & ((1 << (flag_len + 1)) - 1);
       slide_window_len += 1;
 
       if(slide_window_len >= flag_len) {
@@ -77,8 +77,6 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
             stack, 
             (slide_window & (1 << flag_len)) >> flag_len, 
             1);
-
-          slide_window = slide_window & ((1 << flag_len) - 1);
         }
 
         if(flag == (slide_window & ((1 << flag_len) - 1))) {
