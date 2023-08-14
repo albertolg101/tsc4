@@ -1,4 +1,4 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
+import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode, TupleBuilder } from 'ton-core';
 
 export type Task3Config = {};
 
@@ -27,8 +27,11 @@ export class Task3 implements Contract {
         });
     }
 
-    async getFindAndReplace(provider: ContractProvider) {
-        const value = await provider.get("find_and_replace", []);
-        return value;
+    async getFindAndReplace(provider: ContractProvider, flag: number, value: number, linked_list: Cell) {
+        let params = new TupleBuilder();
+        params.writeNumber(flag);
+        params.writeNumber(value);
+        params.writeCell(linked_list);
+        return await provider.get("find_and_replace", params.build());
     }
 }

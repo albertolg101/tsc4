@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { BitString, Cell, toNano } from 'ton-core';
+import { BitString, Cell, beginCell, toNano } from 'ton-core';
 import { Task3 } from '../wrappers/Task3';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -33,15 +33,44 @@ describe('Task3', () => {
     });
 
     it('should deploy', async () => {
-        const value = await task3.getFindAndReplace();
-        console.log(value.gasUsed);
-        let s = value.stack.readCell().asSlice();
-        let ans: Array<BitString> = [s.loadBits(s.remainingBits)];
-        while(s.remainingRefs) {
-            s = s.loadRef().asSlice();
-            ans.push(s.loadBits(s.remainingBits));
-        }
-        console.log(ans);
+        let linked_list = beginCell()
+        .storeUint(0, 1)
+        .storeUint(0, 1)
+        .storeUint(1, 1)
+        .storeUint(1, 1)
+
+        .storeUint(1, 1)
+        .storeUint(0, 1)
+        .storeUint(1, 1)
+        .storeUint(1, 1)
+
+        .storeUint(1, 1)
+        .storeRef(
+            beginCell()
+            .storeUint(0, 1)
+            .storeUint(1, 1)
+            .storeUint(1, 1)
+
+            .storeRef(
+            beginCell()
+            .storeUint(0, 1)
+            .storeUint(0, 1)
+            .storeUint(1, 1)
+            .storeUint(1, 1)
+            .endCell())
+
+            .endCell())
+        .endCell(); // 0011 1011 1011 0011 - 3B3
+        //    ANSWER = 0011 1111 1100 11   - 3FCC
+
+        let answer = beginCell().storeUint(0b0011_1111_1100_11, 14).endCell();
+        
+        let flag = 5;
+        let value = 3;
+
+        const ans = await task3.getFindAndReplace(flag, value, linked_list);
+        console.log(ans.gasUsed);
+        console.log(ans.stack.readCell());
         expect(true).toEqual(true);
     });
 });
