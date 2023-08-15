@@ -77,5 +77,6 @@ describe('Task4', () => {
             gasUsed += value.gasUsed !== undefined && value.gasUsed !== null ? value.gasUsed : 0n;
             expect(value.stack.readCell()).toEqualCell(answers[i]);
         }
+        console.log(gasUsed);
     });
 });

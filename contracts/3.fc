@@ -30,8 +30,7 @@ forall X -> int is_null (X x) asm "ISNULL";
 forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
 forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
-;; !!!!!!!!!!!!!!! TRY USE inline_ref here
-(builder, tuple) append(builder b, tuple t, int value, int len) {
+(builder, tuple) append(builder b, tuple t, int value, int len) inline {
   if(b.builder_bits() + len > CELL_SIZE) {
     t~push_back(b);
     b = begin_cell();
@@ -41,8 +40,7 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
   return (b, t);
 }
 
-;; !!!!!!!!!!!!!!! TRY USE inline_ref here
-(cell) get_cell (tuple stack, builder last_builder) {
+(cell) get_cell (tuple stack, builder last_builder) inline {
   cell last_cell = last_builder.end_cell();
   while(~ stack.is_null()) {
     builder tb = stack~pop_back();

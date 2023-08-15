@@ -28,8 +28,7 @@ const ASCII_z = 122;
 const inf = (1 << 128);
 const cell_size = 1023;
 
-;; !!!!!!!!!!!!!!! TRY USE inline_ref here
-(builder, tuple) append(builder b, tuple t, int value, int len) {
+(builder, tuple) append(builder b, tuple t, int value, int len) inline {
   if(b.builder_bits() + len > cell_size) {
     t~push_back(b);
     b = begin_cell();
@@ -39,8 +38,7 @@ const cell_size = 1023;
   return (b, t);
 }
 
-;; !!!!!!!!!!!!!!! TRY USE inline_ref here
-(cell) get_cell (tuple stack, builder last_builder) {
+(cell) get_cell (tuple stack, builder last_builder) inline {
   cell last_cell = last_builder.end_cell();
   while(~ stack.is_null()) {
     builder tb = stack~pop_back();
