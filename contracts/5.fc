@@ -16,30 +16,53 @@
 () recv_internal() {
 }
 
+forall X -> () print (X x) impure { ~dump(x); }
+
+(int) ubitsize(int value) asm "UBITSIZE";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
   
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
-;; (tuple) fibonacci_sequence () method_id {
-;;    (int n, int k) = (0, 5);
-    tuple ans = empty_tuple();
 
     if(k == 0) {
-        return ans;
+        return empty_tuple();
     }
 
-    int fib_a = -1;
-    int fib_b = 1;
+    int fib_n = 0;
+    int fib_n+1 = 1;
 
-    repeat(n) {
-        (fib_a, fib_b) = (fib_b, fib_a + fib_b);
+    int mask = 0;
+    if(n > 0) {
+        mask = (1 << (ubitsize(n) - 1));
     }
 
-    repeat(k) {
-        (fib_a, fib_b) = (fib_b, fib_a + fib_b);
-        ans~tpush(fib_b);
+    while(mask) {
+        (fib_n, fib_n+1) = (
+            fib_n * (2 * fib_n+1 - fib_n),
+            fib_n * fib_n + fib_n+1 * fib_n+1
+        );
+
+        if(n & mask) {
+            (fib_n, fib_n+1) = (fib_n+1, fib_n + fib_n+1);
+        }
+
+        mask >>= 1;
     }
 
+    tuple ans = empty_tuple();
+    
+    if(k > 0) {
+        ans~tpush(fib_n);
+    }
+
+    if(k > 1) {
+        ans~tpush(fib_n+1);
+    }
+
+    repeat(k - 2) {
+        (fib_n, fib_n+1) = (fib_n+1, fib_n + fib_n+1);
+        ans~tpush(fib_n+1);
+    }
 
     return ans;
 }

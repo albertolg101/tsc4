@@ -1,4 +1,4 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
+import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode, TupleBuilder } from 'ton-core';
 
 export type Task5Config = {};
 
@@ -27,8 +27,10 @@ export class Task5 implements Contract {
         });
     }
 
-    async getFib(provider: ContractProvider) {
-        const value = await provider.get("fibonacci_sequence", []);
-        return value;
+    async getFib(provider: ContractProvider, n: bigint, k: bigint) {
+        let params = new TupleBuilder();
+        params.writeNumber(n);
+        params.writeNumber(k);
+        return await provider.get("fibonacci_sequence", params.build());
     }
 }
