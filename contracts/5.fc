@@ -16,8 +16,6 @@
 () recv_internal() {
 }
 
-forall X -> () print (X x) impure { ~dump(x); }
-
 (int) ubitsize(int value) asm "UBITSIZE";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
   
@@ -31,14 +29,11 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     int fib_n = 0;
     int fib_n+1 = 1;
 
-    int mask = 0;
-    if(n > 0) {
-        mask = (1 << (ubitsize(n) - 1));
-    }
+    int mask = (1 << ubitsize(n)) / 2;
 
-    while(mask) {
+    repeat(ubitsize(n)) {
         (fib_n, fib_n+1) = (
-            fib_n * (2 * fib_n+1 - fib_n),
+            fib_n * ((fib_n+1 << 1) - fib_n),
             fib_n * fib_n + fib_n+1 * fib_n+1
         );
 
@@ -51,15 +46,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
     tuple ans = empty_tuple();
     
-    if(k > 0) {
-        ans~tpush(fib_n);
-    }
+    (fib_n, fib_n+1) = (fib_n+1 - fib_n, fib_n);
+    (fib_n, fib_n+1) = (fib_n+1 - fib_n, fib_n);
 
-    if(k > 1) {
-        ans~tpush(fib_n+1);
-    }
-
-    repeat(k - 2) {
+    repeat(k) {
         (fib_n, fib_n+1) = (fib_n+1, fib_n + fib_n+1);
         ans~tpush(fib_n+1);
     }
