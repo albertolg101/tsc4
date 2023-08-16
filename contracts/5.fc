@@ -20,17 +20,16 @@
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
 (tuple) f (int n, int k) inline asm """
+DUP 1 SETGLOB
+ADD
 -1 INT 1 INT
-1 3 BLKSWAP
+ROT
 REPEAT:<{
-    TUCK ADD
+    DUP2 ADD 
 }>
-ROT DUP
-REPEAT:<{
-    s1 s2 PUSH2 ADD SWAP
-}>
+1 GETGLOB
 TUPLEVAR
-ROTREV DROP2
+1 RETARGS
 """;
   
 ;; testable
