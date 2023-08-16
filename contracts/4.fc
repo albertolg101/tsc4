@@ -15,80 +15,76 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
 forall X -> () print (X x) impure { ~dump(x); }
 
-{-
-ASCII
-A-Z 65-90
-a-z 97-122
--}
-
-const ASCII_A = 65;
-const ASCII_Z = 90;
-const ASCII_a = 97;
-const ASCII_z = 122;
 const inf = (1 << 128);
-const cell_size = 1023;
 
-(builder, tuple) append(builder b, tuple t, int value, int len) inline {
-  if(b.builder_bits() + len > cell_size) {
-    t~push_back(b);
-    b = begin_cell();
-  }
-
-  b~store_uint(value, len);
-  return (b, t);
-}
-
-(cell) get_cell (tuple stack, builder last_builder) inline {
-  cell last_cell = last_builder.end_cell();
-  while(~ stack.is_null()) {
-    builder tb = stack~pop_back();
-    last_cell = tb.store_ref(last_cell)
-                  .end_cell();
-  }
-  return last_cell;
-}
-  
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
+  shift %= 26;
 
   tuple stack = null();
-  builder answer = begin_cell();
-  answer~store_uint(0, 32);
 
   slice stext = text.begin_parse();
-  _ = stext~load_uint(32);
   (int text_recursive_refs, _, _) = text.compute_data_size(inf);
 
+  int mask = 0;
+  int i = 0;
+  repeat(256 / 8) {
+    mask |= (1 << (i * 8));
+    i += 1;
+  }
+
   repeat(text_recursive_refs) {
-    repeat(stext.slice_bits() / 8) {
-      int char = stext~load_uint(8);
-      if((ASCII_A <= char) & (char <= ASCII_Z)) {
-        (answer, stack) = append(
-          answer,
-          stack,
-          (char - ASCII_A + shift) % (ASCII_Z - ASCII_A + 1) + ASCII_A,
-          8);
-      } else { if((ASCII_a <= char) & (char <= ASCII_z)) {
-        (answer, stack) = append(
-          answer,
-          stack,
-          (char - ASCII_a + shift) % (ASCII_z - ASCII_a + 1) + ASCII_a,
-          8);
-      } else {
-        (answer, stack) = append(
-          answer,
-          stack,
-          char,
-          8);
-      } }
+    builder answer = begin_cell();
+    repeat(stext.slice_bits() ^/ 256) {
+      int chunk_bits = min(256, stext.slice_bits());
+      int chunk = stext~load_uint(chunk_bits);
+
+      int s0 = chunk & mask;
+      int s1 = (chunk & (mask << 1)) >> 1;
+      int s2 = (chunk & (mask << 2)) >> 2;
+      int s3 = (chunk & (mask << 3)) >> 3;
+      int s4 = (chunk & (mask << 4)) >> 4;
+      int s5 = (chunk & (mask << 5)) >> 5;
+      int s6 = (chunk & (mask << 6)) >> 6;
+      int s7 = (chunk & (mask << 7)) >> 7;
+
+      int is_letter? = (~ s7) & s6 & (s4 | s3 | s2 | s1 | s0) & (~ (s4 & s3 & (s2 | (s1 & s0))));
+      int is_lower? = is_letter? & s5;
+
+      chunk += is_letter? * shift;
+
+      int s0 = chunk & mask;
+      int s1 = (chunk & (mask << 1)) >> 1;
+      int s2 = (chunk & (mask << 2)) >> 2;
+      int s3 = (chunk & (mask << 3)) >> 3;
+      int s4 = (chunk & (mask << 4)) >> 4;
+      int s5 = (chunk & (mask << 5)) >> 5;
+      int s6 = (chunk & (mask << 6)) >> 6;
+      int s7 = (chunk & (mask << 7)) >> 7;
+
+      int is_letter_after? = (~ s7) & s6 & (s4 | s3 | s2 | s1 | s0) & (~ (s4 & s3 & (s2 | (s1 & s0))));
+
+      int is_lower_after? = is_letter_after? & s5;
+
+      chunk -= ((is_letter? ^ is_letter_after?) | (is_lower? ^ is_lower_after?)) * 26;
+
+      answer~store_uint(chunk, chunk_bits);
     }
 
+    stack~push_back(answer);
+    
     if(stext.slice_refs()) {
       stext = stext~load_ref().begin_parse();
     }
   }
 
-  return stack.get_cell(answer);
+  cell answer = stack~pop_back().end_cell();
+  while(~ stack.is_null()) {
+    builder tb = stack~pop_back();
+    answer = tb.store_ref(answer).end_cell();
+  }
+
+  return answer;
 }
 
 ;; testable

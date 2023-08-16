@@ -34,19 +34,19 @@ describe('Task4', () => {
     it('should deploy', async () => {
         let shift: Array<bigint> = [1n, 2n, 26n, 27n, 28n, -1n, -2n, -26n, -27n, -28n];
         let answers: Array<Cell> = [
-            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("BA ba @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("BA ba @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb @[`{").endCell(),
 
-            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx @[`{").endCell(),
         ]
-        let text = beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell()
+        let text = beginCell().storeUint(0, 32).storeStringTail("AZ az @[`{").endCell()
         let gasUsed = 0n;
         for(let i = 0 ; i < shift.length ; i++) {
             let value = await task4.getCaesarCipherEncrypt(shift[i], text);
@@ -58,19 +58,19 @@ describe('Task4', () => {
     it('should deploy', async () => {
         let shift: Array<bigint> = [1n, 2n, 26n, 27n, 28n, -1n, -2n, -26n, -27n, -28n];
         let answers: Array<Cell> = [
-            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("ZY zy").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("YX yx").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("ZY zy @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("YX yx @[`{").endCell(),
 
-            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("BA ba").endCell(),
-            beginCell().storeUint(0, 32).storeStringTail("CB cb").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("BA ba @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("AZ az @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("BA ba @[`{").endCell(),
+            beginCell().storeUint(0, 32).storeStringTail("CB cb @[`{").endCell(),
         ]
-        let text = beginCell().storeUint(0, 32).storeStringTail("AZ az").endCell()
+        let text = beginCell().storeUint(0, 32).storeStringTail("AZ az @[`{").endCell()
         let gasUsed = 0n;
         for(let i = 0 ; i < shift.length ; i++) {
             let value = await task4.getCaesarCipherDecrypt(shift[i], text);
