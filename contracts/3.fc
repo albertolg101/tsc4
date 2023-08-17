@@ -31,10 +31,10 @@ forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
 forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
 (builder, tuple) append(builder b, tuple t, int value, int len) inline {
-  int bits = min((CELL_SIZE - b.builder_bits(), len));
+  int bits = min(CELL_SIZE - b.builder_bits(), len);
 
   if(bits != 0) {
-    b~store_uint(value >> (len - bits), len);
+    b~store_uint(value >> (len - bits), bits);
   }
 
   if(len != bits) {
@@ -73,24 +73,22 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
       slide_window = ((slide_window << 1) + slinked_list~load_uint(1)) & ((1 << (flag_len + 1)) - 1);
       slide_window_len += 1;
 
-      if(slide_window_len >= flag_len) {
-        if(slide_window_len > flag_len) {
-          (answer, stack) = append(
-            answer,
-            stack, 
-            (slide_window & (1 << flag_len)) >> flag_len, 
-            1);
-          slide_window_len -= 1;
-        }
+      if((slide_window_len >= flag_len) & (slide_window_len > flag_len)) {
+        (answer, stack) = append(
+          answer,
+          stack, 
+          (slide_window & (1 << flag_len)) >> flag_len, 
+          1);
+        slide_window_len -= 1;
+      }
 
-        if(flag == (slide_window & ((1 << flag_len) - 1))) {
-          slide_window_len = 0;
-          (answer, stack) = append(
-            answer,
-            stack,
-            value,
-            value_len);
-        }
+      if((slide_window_len >= flag_len) & (flag == (slide_window & ((1 << flag_len) - 1)))) {
+        slide_window_len = 0;
+        (answer, stack) = append(
+          answer,
+          stack,
+          value,
+          value_len);
       }
     }
 
