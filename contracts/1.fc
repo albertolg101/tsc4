@@ -16,26 +16,33 @@ int cell_hash(cell c) asm "HASHCU";
 
 (cell) f (cell tree, int hash) asm """
 1 SETGLOB
-NEWC ENDC 2 SETGLOB
 WHILE:<{
-    DEPTH
+    DUP HASHCU 1 GETGLOB NEQ
 }>DO<{
-    DUP HASHCU 1 GETGLOB EQUAL
-    IF:<{
-        DUP 2 SETGLOB
-    }>
     CTOS
     DUP SREFS REPEAT:<{
         LDREF
     }>
     DROP
 }>
-2 GETGLOB
+1 INT ONLYTOPX
+""";
+
+forall X -> (X) f2(cell tree, int hash) asm """
+0 INT
+IF:<{
+    1 INT 1 INT ONLYTOPX
+}>ELSE<{
+    2 INT 1 INT ONLYTOPX
+}>
+DEPTH TUPLEVAR
 """;
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
     return f(tree, hash);
+    ;; ~dump(f(tree, hash));
+    ;; return begin_cell().end_cell();
 
     ;; tuple stack = null();
     ;; stack~push_back(tree);
