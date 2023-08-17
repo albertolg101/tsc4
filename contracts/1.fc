@@ -5,33 +5,55 @@
   the subtree (branch) whose hash equals the received hash, the root cell of
   this branch should be returned. Return empty cell if the branch is not found.
 -}
-forall X -> int is_null (X x) asm "ISNULL";
-forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
-forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+;; forall X -> int is_null (X x) asm "ISNULL";
+;; forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
+;; forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+
 int cell_hash(cell c) asm "HASHCU";
 
 () recv_internal() {
 }
 
+(cell) f (cell tree, int hash) asm """
+1 SETGLOB
+NEWC ENDC 2 SETGLOB
+WHILE:<{
+    DEPTH
+}>DO<{
+    DUP HASHCU 1 GETGLOB EQUAL
+    IF:<{
+        DUP 2 SETGLOB
+    }>
+    CTOS
+    DUP SREFS REPEAT:<{
+        LDREF
+    }>
+    DROP
+}>
+2 GETGLOB
+""";
+
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-    tuple stack = null();
-    stack~push_back(tree);
+    return f(tree, hash);
 
-    ;; while stack is not null
-    while ((~ stack.is_null())) {
-        cell c = stack~pop_back();
+    ;; tuple stack = null();
+    ;; stack~push_back(tree);
+
+    ;; ;; while stack is not null
+    ;; while ((~ stack.is_null())) {
+    ;;     cell c = stack~pop_back();
         
-        if(c.cell_hash() == hash) {
-            return c;
-        }
+    ;;     if(c.cell_hash() == hash) {
+    ;;         return c;
+    ;;     }
 
-        slice s = c.begin_parse();
+    ;;     slice s = c.begin_parse();
 
-        repeat (s.slice_refs()) {
-            stack~push_back(s~load_ref());
-        }
-    }
+    ;;     repeat (s.slice_refs()) {
+    ;;         stack~push_back(s~load_ref());
+    ;;     }
+    ;; }
 
-    return begin_cell().end_cell();
+    ;; return begin_cell().end_cell();
 }
