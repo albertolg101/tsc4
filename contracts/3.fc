@@ -31,12 +31,17 @@ forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
 forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
 (builder, tuple) append(builder b, tuple t, int value, int len) inline {
-  if(b.builder_bits() + len > CELL_SIZE) {
-    t~push_back(b);
-    b = begin_cell();
+  int bits = min((CELL_SIZE - b.builder_bits(), len));
+
+  if(bits != 0) {
+    b~store_uint(value >> (len - bits), len);
   }
 
-  b~store_uint(value, len);
+  if(len != bits) {
+    t~push_back(b);
+    b = begin_cell().store_uint(value & ((1 << (len - bits)) - 1), len - bits);
+  }
+
   return (b, t);
 }
 
