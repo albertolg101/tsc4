@@ -24,17 +24,22 @@ WHILE:<{
         LDREF
     }>
     DROP
-
-    DEPTH IFNOT:<{
-        NEWC ENDC DUP HASHCU 1 SETGLOB
-    }>
 }>
 1 INT ONLYTOPX
 """;
 
+forall X -> (X) f2(cell tree, int hash) asm """
+0 INT
+IF:<{
+    1 INT 1 INT ONLYTOPX
+}>ELSE<{
+    2 INT 1 INT ONLYTOPX
+}>
+DEPTH TUPLEVAR
+""";
+
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-    ;; ~dump(begin_cell().end_cell().cell_hash());
     return f(tree, hash);
     ;; ~dump(f(tree, hash));
     ;; return begin_cell().end_cell();
