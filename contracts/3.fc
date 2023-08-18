@@ -75,9 +75,9 @@ STUX
   int slide_window_len = 0;
   
   slice slinked_list = linked_list.begin_parse();
-  int slinked_list_len = slinked_list.slice_depth() + 1;
+  (int linked_list_len, _, _) = linked_list.compute_data_size(INF);
 
-  repeat(slinked_list_len) {
+  repeat(linked_list_len) {
     repeat(slinked_list.slice_bits()) {
       slide_window = ((slide_window << 1) + slinked_list~load_uint(1)) & ((1 << (flag_len + 1)) - 1);
       slide_window_len += 1;
