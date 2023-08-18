@@ -71,12 +71,13 @@ STUX
   builder answer =  begin_cell();
   tuple stack = null();
 
-  slice slinked_list = linked_list.begin_parse();
-  
   int slide_window = 0;
   int slide_window_len = 0;
+  
+  slice slinked_list = linked_list.begin_parse();
+  int slinked_list_len = slinked_list.slice_depth() + 1;
 
-  repeat(slinked_list.slice_depth() + 1) {
+  repeat(slinked_list_len) {
     repeat(slinked_list.slice_bits()) {
       slide_window = ((slide_window << 1) + slinked_list~load_uint(1)) & ((1 << (flag_len + 1)) - 1);
       slide_window_len += 1;
