@@ -29,16 +29,30 @@ const CELL_SIZE = 1023;
 forall X -> int is_null (X x) asm "ISNULL";
 forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
 forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
+int bbits(builder b) asm "BBITS";
 
-(builder, tuple) append(builder b, tuple t, int value, int len) inline {
-  if(b.builder_bits() + len > CELL_SIZE) {
-    t~push_back(b);
-    b = begin_cell();
-  }
+(tuple, builder) append (tuple t, builder b, int len, int value) asm """
+s1 PUSH s3 PUSH BBITS
+ADD 1023 INT GREATER
+IF:<{
+  2 2 BLKSWAP
+  CONS
+  NEWC
+  2 2 BLKSWAP
+}>
+ROTREV
+STUX
+""";
 
-  b~store_uint(value, len);
-  return (b, t);
-}
+;; (builder, tuple) append(builder b, tuple t, int value, int len) inline {
+;;   if(b.builder_bits() + len > CELL_SIZE) {
+;;     t~push_back(b);
+;;     b = begin_cell();
+;;   }
+
+;;   b~store_uint(value, len);
+;;   return (b, t);
+;; }
 
 (cell) get_cell (tuple stack, builder last_builder) inline {
   cell last_cell = last_builder.end_cell();
@@ -70,21 +84,21 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
       if(slide_window_len >= flag_len) {
         if(slide_window_len > flag_len) {
-          (answer, stack) = append(
-            answer,
+          (stack, answer) = append(
             stack, 
-            (slide_window & (1 << flag_len)) >> flag_len, 
-            1);
+            answer,
+            1,
+            (slide_window & (1 << flag_len)) >> flag_len);
           slide_window_len -= 1;
         }
 
         if(flag == (slide_window & ((1 << flag_len) - 1))) {
           slide_window_len = 0;
-          (answer, stack) = append(
-            answer,
+          (stack, answer) = append(
             stack,
-            value,
-            value_len);
+            answer,
+            value_len,
+            value);
         }
       }
     }
@@ -94,8 +108,9 @@ forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
     }
   }
 
-  (answer, stack) = append(answer, stack, slide_window & ((1 << slide_window_len) - 1), slide_window_len);
-  
+  (stack, answer) = append(stack, answer, slide_window_len, slide_window & ((1 << slide_window_len) - 1));
+
   return stack.get_cell(answer);
+  ;; return begin_cell().end_cell();
 }
 
