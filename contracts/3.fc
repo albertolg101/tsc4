@@ -31,7 +31,7 @@ forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
 forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 int bbits(builder b) asm "BBITS";
 
-(tuple, builder) append (tuple t, builder b, int len, int value) asm """
+(tuple, builder) append (tuple t, builder b, int len, int value) inline asm """
 s1 PUSH s3 PUSH BBITS
 ADD 1023 INT GREATER
 IF:<{
