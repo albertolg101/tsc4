@@ -100,7 +100,9 @@ STUX
             value_len,
             value);
           slide_window_len = min(flag_len, slinked_list.sbits());
-          slide_window = slinked_list~load_uint(slide_window_len);
+          if(slide_window_len != 0) {
+            slide_window = slinked_list~load_uint(slide_window_len);
+          }
         }
       }
     }
