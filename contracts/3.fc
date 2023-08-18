@@ -71,11 +71,11 @@ STUX
   builder answer =  begin_cell();
   tuple stack = null();
 
+  (int linked_list_len, _, _) = linked_list.compute_data_size(INF);
+  slice slinked_list = linked_list.begin_parse();
+  
   int slide_window = 0;
   int slide_window_len = 0;
-  
-  slice slinked_list = linked_list.begin_parse();
-  (int linked_list_len, _, _) = linked_list.compute_data_size(INF);
 
   repeat(linked_list_len) {
     repeat(slinked_list.slice_bits()) {
@@ -113,4 +113,3 @@ STUX
   return stack.get_cell(answer);
   ;; return begin_cell().end_cell();
 }
-
