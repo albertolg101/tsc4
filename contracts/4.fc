@@ -49,7 +49,6 @@ const inf = (1 << 128);
       int s7 = (chunk & (mask << 7)) >> 7;
 
       int is_letter? = (~ s7) & s6 & (s4 | s3 | s2 | s1 | s0) & (~ (s4 & s3 & (s2 | (s1 & s0))));
-      int is_lower? = is_letter? & s5;
 
       chunk += is_letter? * shift;
 
@@ -58,15 +57,13 @@ const inf = (1 << 128);
       int s2 = (chunk & (mask << 2)) >> 2;
       int s3 = (chunk & (mask << 3)) >> 3;
       int s4 = (chunk & (mask << 4)) >> 4;
-      int s5 = (chunk & (mask << 5)) >> 5;
+      int s5_after = (chunk & (mask << 5)) >> 5;
       int s6 = (chunk & (mask << 6)) >> 6;
       int s7 = (chunk & (mask << 7)) >> 7;
 
       int is_letter_after? = (~ s7) & s6 & (s4 | s3 | s2 | s1 | s0) & (~ (s4 & s3 & (s2 | (s1 & s0))));
 
-      int is_lower_after? = is_letter_after? & s5;
-
-      chunk -= ((is_letter? ^ is_letter_after?) | (is_lower? ^ is_lower_after?)) * 26;
+      chunk -= ((is_letter? ^ is_letter_after?) | ((is_letter? & s5) ^ (is_letter_after? & s5_after))) * 26;
 
       answer~store_uint(chunk, chunk_bits);
     }
