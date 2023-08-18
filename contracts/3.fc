@@ -30,7 +30,6 @@ forall X -> int is_null (X x) asm "ISNULL";
 forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
 forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 int bbits(builder b) asm "BBITS";
-int sbits(slice b) asm "SBITS";
 
 (tuple, builder) append (tuple t, builder b, int len, int value) asm """
 s1 PUSH s3 PUSH BBITS
@@ -79,7 +78,7 @@ STUX
   int slide_window_len = 0;
 
   repeat(linked_list_len) {
-    while(slinked_list.slice_bits()) {
+    repeat(slinked_list.slice_bits()) {
       slide_window = ((slide_window << 1) + slinked_list~load_uint(1)) & ((1 << (flag_len + 1)) - 1);
       slide_window_len += 1;
 
@@ -94,13 +93,12 @@ STUX
         }
 
         if(flag == (slide_window & ((1 << flag_len) - 1))) {
+          slide_window_len = 0;
           (stack, answer) = append(
             stack,
             answer,
             value_len,
             value);
-          slide_window_len = min(flag_len, slinked_list.sbits());
-          slide_window = slinked_list~load_uint(slide_window_len);
         }
       }
     }
